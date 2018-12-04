@@ -1,6 +1,6 @@
 /*
-* 连接数据库模块
-* */
+ * 连接数据库模块
+ * */
 const mongoose = require('mongoose');
 
 

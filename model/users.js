@@ -1,9 +1,20 @@
-/*
-* 模型对象
-* */
+
 const mongoose = require('mongoose');
 
-const usersShema = new mongoose.Schema({
+const usersSchema = new mongoose.Schema({
+  username: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  password: {
+    type: String,
+    required: true,
+  },
+  type: {
+    type: String,
+    required: true
+  }
+})
 
-});
-module.exports = mongoose.model('users',usersShema)
+module.exports = mongoose.model('Users', usersSchema);

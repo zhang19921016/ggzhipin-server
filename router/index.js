@@ -1,12 +1,86 @@
-/*
-* 路由器
-* */
+
 const express = require('express');
+const Users = require('../model/users');
+const md5 = require('blueimp-md5');
+
 const router = new express.Router();
 
-router.get('/',(req,res) => {
-  res.send('这是服务器返回的响应')
+//解析请求体数据
+router.use(express.urlencoded({extended: true}));
+
+router.get('/', (req, res) => {
+  res.send('这是服务器返回的响应');
 })
 
+//注册
+router.post('/register', async (req, res) => {
+  //获取用户提交请求参数信息
+  const {username, password, type} = req.body;
+  console.log(req.body);
+  console.log(username, password, type);
+  try {
+    //去数据库查找当前用户是否存在
+    const user = await Users.findOne({username});
+    console.log(user);
+    if (user) {
+      //用户名被注册了
+      res.json({
+        code: 1,
+        msg: '此用户已存在'
+      })
+    } else {
+      //用户可以注册
+      //保存在数据库中
+      const user = await Users.create({username, password: md5(password), type});
+      console.log(user);
+      //返回成功的响应
+      res.json({
+        code: 0,
+        data: {
+          username: user.username,
+          _id: user.id,
+          type: user.type
+        }
+      })
+    }
+  } catch (e) {
+    console.log(e);
+    res.json({
+      code: 2,
+      msg: '网络不稳定，请刷新试试~'
+    })
+  }
+})
+//登陆
+router.post('/login', async (req, res) => {
+  //获取用户提交请求参数信息
+  const {username, password} = req.body;
+  try {
+    //去数据库查找当前用户是否存在
+    const user = await Users.findOne({username,password: md5(password)});
+    if (user) {
+      //可以登陆
+      res.json({
+        code: 0,
+        data: {
+          username: user.username,
+          _id: user.id,
+          type: user.type
+        }
+      })
+    } else {
+      //返回成功的响应
+      res.json({
+        code: 1,
+        msg:'用户名或者密码错误'
+      })
+    }
+  } catch (e) {
+    res.json({
+      code: 2,
+      msg: '网络不稳定，请刷新试试~'
+    })
+  }
+})
 
 module.exports = router;
